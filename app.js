@@ -1,5 +1,8 @@
-const userAction = 0
-const prompt = require('prompt-sync')();
+let userAction = 0
+let newCusotmerName
+let newCusotmerAge
+let selectedCustomerID=0;
+const prompt = require (`prompt-sync`)();
 const username = prompt('What is your name? ');
 const customerSchema=new mongoose.Schema({
   name:String,
@@ -12,7 +15,7 @@ async function connect (){
 await mongoose.connect(process.env.MONGODB_URI);
 console.log(`Connected to MongoDB`)
 }
-connect()
+await connect()
 
 for (i=userAction;i!=5;){
 
@@ -37,26 +40,56 @@ id: 65825d1ead6cd90c5c430e24 --  Name: Vivienne, Age: 6\n
 
 if(userAction==1){
  console.log(` Add new customer `)
- const cusotmerName= prompt (`Enter the new cusotmer name:`)
- const cusotmerAge= prompt (`Enter the new cusotmer age:`)
+ newCusotmerName= prompt (`Enter the new cusotmer name:`)
+ newCusotmerAge= prompt (`Enter the new cusotmer age:`)
+ await createCustomer(newCusotmerName,newCusotmerAge)
+ async function createCustomer(newCusotmerName,newCusotmerAge){
+  const newCustomer = {
+    name: newCusotmerName,
+    age: newCusotmerAge
+  }
+  const createdCutomer = await customer.create(newCustomer)
+  console.log("created new customer: ", createdCutomer)
+}
 
 }
 
 if(userAction==2){
   console.log(` Viewing updated customers `)
- 
+
  }
 
  if(userAction==3){
-  console.log(` Updating a customer.. Copy and paste the id of the customer you would like to update here: `)
- 
+  console.log(` Updating a customer..`)
+  selectedCustomerID=prompt(` Copy and paste the id of the customer you would like to update here: `)
+   newCusotmerName= prompt (`Enter the new cusotmer name:`)
+   newCusotmerAge= prompt (`Enter the new cusotmer age:`)
+   await updateOneCustomer(selectedCustomerID,newCusotmerName,newCusotmerAge)
+    async function updateOneCustomer(selectedCustomerID,newCusotmerName,newCusotmerAge){
+
+    const updatedCustomer = await customer.findByIdAndUpdate(selectedCustomerID,{name:newCusotmerName},{age:newCusotmerAge})
+
+    console.log(updatedCustomer)
+  }
+
  }if(userAction==4){
-  console.log(` Delete a customer.. Copy and paste the id of the customer you would like to delete here: `)
- 
+  console.log(` Delete a customer..`)
+  selectedCustomerID=prompt(`Copy and paste the id of the customer you would like to delete here: `)
+ await  deleteOneCustomer(selectedCustomerID)
+  async function deleteOneCustomer(selectedCustomerID){
+const deletedCustomer = await customer.findByIdAndDelete(selectedCustomerID)
+console.log(deletedCustomer)
+
+  }
+
  }if(userAction==5){
   console.log(` Exiting the application `)
- 
- 
+
+  await mongoose.disconnect();
+  console.log('Disconnected from MongoDB');
+
+  process.exit();
+ }
 
 /* Define the model
 Create a new model file and build the customer schema.
@@ -105,16 +138,16 @@ What would you like to do?
   4. Delete a customer
   5. quit
 
-Number of action to run: 
+Number of action to run:
 # user inputs 3
 Updating a customer
 Copy
-Below is a list of customers: 
+Below is a list of customers:
 
 id: 658226acdcbecfe9b99d5421 --  Name: Matt, Age: 43
 id: 65825d1ead6cd90c5c430e24 --  Name: Vivienne, Age: 6
 
-Copy and paste the id of the customer you would like to update here: 
+Copy and paste the id of the customer you would like to update here:
 # user inputs 658226acdcbecfe9b99d5421
 
 What is the customers new name?
@@ -131,7 +164,7 @@ What would you like to do?
   4. Delete a customer
   5. Quit
 
-Number of action to run: 
+Number of action to run:
 # user inputs 2
 Viewing updated customers
 Copy
@@ -147,7 +180,7 @@ What would you like to do?
   4. Delete a customer
   5. Quit
 
-Number of action to run: 
+Number of action to run:
 # user inputs 5
 Exiting the Application
 
